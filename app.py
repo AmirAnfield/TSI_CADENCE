@@ -1,7 +1,7 @@
 import streamlit as st
 
 # Titre de l'application
-st.title("Calcul des Cadences Professionnelles")
+st.title("Calcul des Cadences")
 
 # Cadences attendues par activité
 cadences = {
@@ -16,16 +16,16 @@ cadences = {
 }
 
 # Formulaire pour entrer les nombres de dossiers traités
-st.header("Saisissez le nombre de dossiers traités pour chaque activité")
+st.header("Nnombre de dossiers traités pour chaque activité")
 
-req_fr = st.number_input("Nombre de REQ FR traités", min_value=0, value=0)
-req_it = st.number_input("Nombre de REQ IT traités", min_value=0, value=0)
-pep_sl = st.number_input("Nombre de PEP / SL traités", min_value=0, value=0)
-sct_in = st.number_input("Nombre de SCT IN traités", min_value=0, value=0)
-sct_out = st.number_input("Nombre de SCT OUT traités", min_value=0, value=0)
-swift_in = st.number_input("Nombre de Swift in traités", min_value=0, value=0)
-arkea = st.number_input("Nombre d'Arkéa traités", min_value=0, value=0)
-point_aic = st.number_input("Nombre de points AIC traités (en minutes)", min_value=0, value=0)
+req_fr = st.number_input("REQ FR", min_value=0, value=0)
+req_it = st.number_input("REQ IT", min_value=0, value=0)
+pep_sl = st.number_input("PEP / SL", min_value=0, value=0)
+sct_in = st.number_input("SCT IN", min_value=0, value=0)
+sct_out = st.number_input("SCT OUT", min_value=0, value=0)
+swift_in = st.number_input("Swift IN", min_value=0, value=0)
+arkea = st.number_input("Arkéa", min_value=0, value=0)
+point_aic = st.number_input("Points AIC traités (en minutes)", min_value=0, value=0)
 
 # Calcul du temps passé pour chaque activité
 temps_total = (
