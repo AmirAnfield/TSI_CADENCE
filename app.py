@@ -16,7 +16,7 @@ cadences = {
 }
 
 # Formulaire pour entrer les nombres de dossiers traités
-st.header("Nnombre de dossiers traités pour chaque activité")
+st.header("Nombre de dossiers traités pour chaque activité")
 
 req_fr = st.number_input("REQ FR", min_value=0, value=0)
 req_it = st.number_input("REQ IT", min_value=0, value=0)
