@@ -44,4 +44,4 @@ st.write(f"Temps total passé sur les activités : {temps_total:.2f} heures")
 
 # Calcul du temps restant pour les mails
 temps_mails = max(0, 7 - temps_total)
-st.write(f"Temps à allouer aux mails : {temps_mails:.
+st.write(f"Temps à allouer aux mails : {temps_mails:.2f} heures")
