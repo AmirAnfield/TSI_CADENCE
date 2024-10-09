@@ -4,7 +4,7 @@ from google.oauth2.service_account import Credentials
 
 # Configuration des autorisations
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = Credentials.from_service_account_file("Credentials/tsi-cadence-678df727045f.json", scopes=scope)
+creds = Credentials.from_service_account_file("credentials/tsi-cadence-678df727045f.json", scopes=scope)
 client = gspread.authorize(creds)
 
 # Ouvrir la feuille de calcul
