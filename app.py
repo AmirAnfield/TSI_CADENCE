@@ -1,39 +1,43 @@
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
 import streamlit as st
+import gspread
+from google.oauth2.service_account import Credentials
 
-# Utiliser les API Google Drive et Google Sheets
-scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+# Configuration des autorisations
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+creds = Credentials.from_service_account_file("tsi-cadence-678df727045f.json", scopes=scope)
+client = gspread.authorize(creds)
 
-# Charger le fichier JSON des identifiants
-credentials = ServiceAccountCredentials.from_json_keyfile_name('credentials/tsi-cadence-678df727045f.json', scope)
-
-# Authentifier le client gspread
-client = gspread.authorize(credentials)
-
-# Ouvrir la feuille Google Sheets par son nom
+# Ouvrir la feuille de calcul
 sheet = client.open("TSI_CADENCE").sheet1  # Utilise le nom de ta feuille ici
 
-# Fonction pour ajouter des données à Google Sheets
-def ajouter_donnees(data):
-    sheet.append_row(data)
+# Fonction pour le calcul des cadences
+def calculer_cadences(dossiers):
+    cadences = {
+        "REQ FR": 10,
+        "REQ IT": 0.6,
+        "PEP / SL": 16,
+        "SCT IN": 28,
+        "SCT OUT": 24,
+        "Swift in": 44,
+        "Arkéa": 14,
+        "Point AIC": 1 / 60  # Conversion en dossier par minute
+    }
+    temps_mails = 7 * 60  # 7 heures en minutes
+
+    # Calculer le total des dossiers
+    total_dossiers = sum(dossiers.values())
+    
+    # Calculer le temps à allouer aux mails
+    temps_mails_alloues = temps_mails - total_dossiers
+
+    return temps_mails_alloues
 
 # Interface Streamlit
-st.title("Suivi des Cadences")
+st.title("Calculateur de Cadences")
+dossiers = {}
+for key in ["REQ FR", "REQ IT", "PEP / SL", "SCT IN", "SCT OUT", "Swift in", "Arkéa", "Point AIC"]:
+    dossiers[key] = st.number_input(f"Nombre de dossiers pour {key}", min_value=0)
 
-# Saisie des données
-date = st.date_input("Date")
-req_fr = st.number_input("REQ FR", min_value=0)
-req_it = st.number_input("REQ IT", min_value=0)
-pep_sl = st.number_input("PEP / SL", min_value=0)
-sct_in = st.number_input("SCT IN", min_value=0)
-sct_out = st.number_input("SCT OUT", min_value=0)
-swift_in = st.number_input("Swift in", min_value=0)
-arkea = st.number_input("Arkéa", min_value=0)
-point_aic = st.number_input("Point AIC", min_value=0)
-
-# Bouton pour ajouter les données
-if st.button("Ajouter les données"):
-    data = [str(date), req_fr, req_it, pep_sl, sct_in, sct_out, swift_in, arkea, point_aic]
-    ajouter_donnees(data)
-    st.success("Données ajoutées avec succès !")
+if st.button("Calculer"):
+    temps_mails = calculer_cadences(dossiers)
+    st.write(f"Temps à allouer aux mails : {temps_mails} minutes")
