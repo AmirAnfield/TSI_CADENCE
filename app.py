@@ -1,43 +1,61 @@
 import streamlit as st
-import gspread
-from google.oauth2.service_account import Credentials
+import requests
+import json
+from datetime import datetime
 
-# Configuration des autorisations
-scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = Credentials.from_service_account_file("credentials/tsi-cadence-678df727045f.json", scopes=scope)
-client = gspread.authorize(creds)
+# Titre de l'application
+st.title("Suivi des Cadences Professionnelles")
 
-# Ouvrir la feuille de calcul
-sheet = client.open("TSI_CADENCE").sheet1  # Utilise le nom de ta feuille ici
+# Saisie des données
+st.header("Saisissez les informations de vos dossiers")
+nombre_dossiers = st.number_input("Nombre de dossiers traités", min_value=0)
+date = st.date_input("Date", value=datetime.today())
 
-# Fonction pour le calcul des cadences
-def calculer_cadences(dossiers):
-    cadences = {
-        "REQ FR": 10,
-        "REQ IT": 0.6,
-        "PEP / SL": 16,
-        "SCT IN": 28,
-        "SCT OUT": 24,
-        "Swift in": 44,
-        "Arkéa": 14,
-        "Point AIC": 1 / 60  # Conversion en dossier par minute
+# Bouton pour soumettre les données
+if st.button("Soumettre"):
+    # Préparer les données à sauvegarder
+    data = {
+        "date": date.isoformat(),
+        "nombre_dossiers": nombre_dossiers
     }
-    temps_mails = 7 * 60  # 7 heures en minutes
 
-    # Calculer le total des dossiers
-    total_dossiers = sum(dossiers.values())
+    # URL pour l'API GitHub
+    token = "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"
+    repo_name = "tsi-cadence"
+    file_name = f"cadences_{date.isoformat()}.json"
+    url = f"https://api.github.com/repos/YOUR_USERNAME/{repo_name}/contents/{file_name}"
+
+    # Vérification de l'existence du fichier
+    response = requests.get(url, headers={"Authorization": f"token {token}"})
     
-    # Calculer le temps à allouer aux mails
-    temps_mails_alloues = temps_mails - total_dossiers
+    if response.status_code == 200:
+        # Fichier existe déjà, mettre à jour
+        sha = response.json()["sha"]
+        existing_data = json.loads(requests.get(url).json()["content"])
+        existing_data.append(data)
+        content = json.dumps(existing_data)
 
-    return temps_mails_alloues
+        # Mettre à jour le fichier
+        requests.put(url, headers={
+            "Authorization": f"token {token}",
+            "Content-Type": "application/json"
+        }, json={
+            "message": "Mise à jour des cadences",
+            "sha": sha,
+            "content": content,
+            "branch": "main"
+        })
+    else:
+        # Créer un nouveau fichier
+        content = json.dumps([data])
 
-# Interface Streamlit
-st.title("Calculateur de Cadences")
-dossiers = {}
-for key in ["REQ FR", "REQ IT", "PEP / SL", "SCT IN", "SCT OUT", "Swift in", "Arkéa", "Point AIC"]:
-    dossiers[key] = st.number_input(f"Nombre de dossiers pour {key}", min_value=0)
+        requests.put(url, headers={
+            "Authorization": f"token {token}",
+            "Content-Type": "application/json"
+        }, json={
+            "message": "Création du fichier de cadences",
+            "content": content,
+            "branch": "main"
+        })
 
-if st.button("Calculer"):
-    temps_mails = calculer_cadences(dossiers)
-    st.write(f"Temps à allouer aux mails : {temps_mails} minutes")
+    st.success("Données enregistrées avec succès !")
